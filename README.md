@@ -1,4 +1,4 @@
-# EdgeX Snap Tests
+# Matter Snap Tests (WIP)
 Test scripts, Github actions, and workflows for the [EdgeX Foundry](https://docs.edgexfoundry.org/) snaps.
 
 The following diagram shows the Snap Testing workflow for building and testing snaps from upstream source code:

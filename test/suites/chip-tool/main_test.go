@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"sync"
+	"os/exec"
 )
 
 const chipToolSnap = "chip-tool"
@@ -27,10 +29,20 @@ func TestMain(m *testing.M) {
 }
 
 func TestMatterDeviceOperations(t *testing.T) {
-	t.Cleanup(func() {
-		// unpair connected devices
-		utils.Exec(nil, "sudo chip-tool pairing unpair 110")
-	})
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	// launch chip-all-clusters-minimal-app in the background
+	go func() {
+		defer wg.Done()
+		cmd := exec.Command("./chip-all-clusters-minimal-app")
+		err := cmd.Start()
+		if err != nil {
+			fmt.Printf("Error starting application: %s\n", err)
+		}
+	}()
+
+	wg.Wait()
 
 	t.Run("Commission", func(t *testing.T) {
 		utils.Exec(t, "sudo chip-tool pairing onnetwork 110 20202021")

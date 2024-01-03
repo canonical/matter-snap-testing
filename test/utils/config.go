@@ -188,40 +188,8 @@ func TestAutostartGlobal(t *testing.T, snapName string) {
 	})
 }
 
-// DoNotUseConfigProviderPlatformSnap disables the config provider for the specified app
-// and sets the common configuration path
-func DoNotUseConfigProviderPlatformSnap(t *testing.T, snap, app string) (revert func()) {
-	t.Logf("Configure %s to not use Config Provider", app)
-
-	SnapSet(t, snap, "apps."+app+".config.edgex-config-provider", "none")
-	SnapSet(t, snap, "apps."+app+".config.edgex-common-config", "./config/core-common-config-bootstrapper/res/configuration.yaml")
-
-	return func() {
-		t.Log("Revert to use Config Provider as usual")
-		SnapUnset(t, snap, "apps."+app+".config.edgex-config-provider")
-		SnapUnset(t, snap, "apps."+app+".config.edgex-common-config")
-	}
-}
-
-// DoNotUseConfigProviderServiceSnap disables the config provider for the specified app,
-// copies the common configuration file from the platform snap to the service snap,
-// and sets the common configuration path.
-func DoNotUseConfigProviderServiceSnap(t *testing.T, snap, app string) {
-	SnapSet(t, snap, "apps."+app+".config.edgex-config-provider", "none")
-
-	t.Logf("Copying common config file from platform snap to service snap: %s", snap)
-
-	sourceFile := "/snap/edgexfoundry/current/config/core-common-config-bootstrapper/res/configuration.yaml"
-	destFile := "/var/snap/" + snap + "/current/config/common-config.yaml"
-	Exec(t, "sudo cp "+sourceFile+" "+destFile)
-
-	SnapSet(t, snap, "apps."+app+".config.edgex-common-config", destFile)
-}
-
 func WaitForLogMessage(t *testing.T, snap, expectedLog string, since time.Time) {
 	const maxRetry = 10
-
-	WaitPlatformOnline(t)
 
 	for i := 1; i <= maxRetry; i++ {
 		time.Sleep(1 * time.Second)

@@ -32,18 +32,6 @@ func ServicePort(serviceName string) string {
 	panic("Found no port number for service: " + serviceName)
 }
 
-func PlatformPorts(includePublicPorts bool) (ports []string) {
-	ports = append(ports,
-		ServicePort("chip-tool"),
-	)
-	if includePublicPorts {
-		ports = append(ports,
-			ServicePort("nginx(https)"),
-		)
-	}
-	return
-}
-
 func TestNet(t *testing.T, snapName string, conf Net) {
 	t.Run("net", func(t *testing.T) {
 		if conf.StartSnap {
@@ -140,12 +128,6 @@ func WaitServiceOnline(t *testing.T, maxRetry int, ports ...string) error {
 	}
 
 	return nil
-}
-
-// WaitPlatformOnline waits for all platform ports to come online
-// by dialing its port(s) up to a maximum number
-func WaitPlatformOnline(t *testing.T) error {
-	return WaitServiceOnline(t, 180, PlatformPorts(true)...)
 }
 
 // requirePortOpen checks if the local port(s) accepts connections

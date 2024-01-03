@@ -11,7 +11,7 @@ inputs:
     description: Name of the testing suite
     required: true
   snap:
-    description: Relative path to local platform or service snap
+    description: Relative path to local snap
     required: false
   channel:
     description: |

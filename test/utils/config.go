@@ -70,8 +70,6 @@ func testChangePort_app(t *testing.T, snap, app, servicePort string) {
 		// make sure the port is available before using it
 		RequirePortAvailable(t, newPort)
 
-		DoNotUseConfigProviderServiceSnap(t, snap, app)
-
 		// set apps. and validate the new port comes online
 		SnapSet(t, snap, "apps."+app+".config.service-port", newPort)
 		SnapStart(t, service)
@@ -102,8 +100,6 @@ func testChangePort_global(t *testing.T, snap, app, servicePort string) {
 
 		// make sure the port is available before using it
 		RequirePortAvailable(t, newPort)
-
-		DoNotUseConfigProviderServiceSnap(t, snap, app)
 
 		// set config. and validate the new port comes online
 		SnapSet(t, snap, "config.service-port", newPort)
@@ -141,8 +137,6 @@ func testChangePort_mixedGlobalApp(t *testing.T, snap, app, servicePort string) 
 		// make sure the ports are available before using it
 		RequirePortAvailable(t, newAppPort)
 		RequirePortAvailable(t, newConfigPort)
-
-		DoNotUseConfigProviderServiceSnap(t, snap, app)
 
 		// set apps. and config. with different values,
 		// and validate that app-specific option has been picked up because it has higher precedence

@@ -32,7 +32,7 @@ func TestMain(m *testing.M) {
 var cmd *exec.Cmd
 func TestMatterDeviceOperations(t *testing.T) {
 	//setup
-	if err := os.Remove("./chip-all-clusters-minimal-app-ptpython-fix.log"); err != nil && !os.IsNotExist(err) {
+	if err := os.Remove("./chip-all-clusters-minimal-app-commit-1536ca2.log"); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("Error deleting log file: %s\n", err)
 	}
 	if err := os.Remove("./chip-tool.log"); err != nil && !os.IsNotExist(err) {
@@ -42,17 +42,17 @@ func TestMatterDeviceOperations(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	logFile, err := os.Create("chip-all-clusters-minimal-app-ptpython-fix.log")
+	logFile, err := os.Create("chip-all-clusters-minimal-app-commit-1536ca2.log")
 	if err != nil {
 		t.Fatalf("Error creating log file: %s\n", err)
 	}
 	defer logFile.Close()
 
-	// run chip-all-clusters-minimal-app-ptpython-fix in the background
+	// run chip-all-clusters-minimal-app-commit-1536ca2 in the background
 	go func() {
 		defer wg.Done()
 
-		cmd = exec.Command("./chip-all-clusters-minimal-app-ptpython-fix")
+		cmd = exec.Command("./chip-all-clusters-minimal-app-commit-1536ca2")
 		cmd.Stdout = logFile
 		cmd.Stderr = logFile
 
@@ -77,7 +77,7 @@ func TestMatterDeviceOperations(t *testing.T) {
 
 	t.Run("Control", func(t *testing.T) {
 		utils.Exec(t, "sudo chip-tool onoff toggle 110 1")
-		WaitForAppMessage(t, "./chip-all-clusters-minimal-app-ptpython-fix.log", "CHIP:ZCL: Toggle ep1 on/off", start)
+		WaitForAppMessage(t, "./chip-all-clusters-minimal-app-commit-1536ca2.log", "CHIP:ZCL: Toggle ep1 on/off", start)
 	})
 }
 

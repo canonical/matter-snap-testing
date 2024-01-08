@@ -1,4 +1,4 @@
-name: EdgeX Snap Builder
+name: Matter Snap Builder
 description: |
   This action clones the source code, builds the snap using and 
   uploads the resulting snap as a build artifact

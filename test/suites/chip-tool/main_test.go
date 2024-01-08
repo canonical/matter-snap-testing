@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 )
@@ -42,39 +41,30 @@ func TestMatterDeviceOperations(t *testing.T) {
 		t.Fatalf("Error deleting log file: %s\n", err)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-
 	logFile, err := os.Create(chipAllClusterMinimalAppLog)
 	if err != nil {
 		t.Fatalf("Error creating log file: %s\n", err)
 	}
 
 	// run chip-all-clusters-minimal-app in the background
-	go func() {
-		defer wg.Done()
+	cmd = exec.Command("./" + chipAllClusterMinimalAppFile)
+	cmd.Stdout = logFile
+	cmd.Stderr = logFile
 
-		cmd = exec.Command("./" + chipAllClusterMinimalAppFile)
-		cmd.Stdout = logFile
-		cmd.Stderr = logFile
+	err = cmd.Start()
+	if err != nil {
+		fmt.Printf("Error starting application: %s\n", err)
+	}
 
-		err := cmd.Start()
-		if err != nil {
-			fmt.Printf("Error starting application: %s\n", err)
-		}
-
-		if logFile != nil {
-            logFile.Close()
-        }
-	}()
+	if logFile != nil {
+		logFile.Close()
+	}
 
 	t.Cleanup(func() {
-        if err := cmd.Process.Kill(); err != nil {
-            t.Fatalf("Error killing process: %s\n", err)
-        }
-    })
-
-	wg.Wait()
+		if err := cmd.Process.Kill(); err != nil {
+			t.Fatalf("Error killing process: %s\n", err)
+		}
+	})
 
 	t.Run("Commission", func(t *testing.T) {
 		utils.Exec(t, "sudo chip-tool pairing onnetwork 110 20202021")

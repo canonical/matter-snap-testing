@@ -38,7 +38,7 @@ runs:
     - uses: snapcore/action-build@v1
       id: build
       with:
-        snapcraft-args: ${{ env.base == 'core22' && '--verbose' || '' }}
+        snapcraft-args: '--verbose'
     
     # Upload the snap as build artifact
     - uses: actions/upload-artifact@v3

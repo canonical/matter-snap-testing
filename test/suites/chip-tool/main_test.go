@@ -5,14 +5,11 @@ import (
 	"log"
 	"matter-snap-testing/test/utils"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
-	"sync"
-	"os/exec"
 )
-
-const chipToolSnap = "chip-tool"
 
 var start = time.Now()
 
@@ -28,48 +25,46 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-
 var cmd *exec.Cmd
+
 func TestMatterDeviceOperations(t *testing.T) {
+	const (
+		chipAllClusterMinimalAppFile = "chip-all-clusters-minimal-app-commit-1536ca2"
+		chipAllClusterMinimalAppLog  = "chip-all-clusters-minimal-app.log"
+	)
+
 	//setup
-	if err := os.Remove("./chip-all-clusters-minimal-app-commit-1536ca2.log"); err != nil && !os.IsNotExist(err) {
+	if err := os.Remove("./" + chipAllClusterMinimalAppLog); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("Error deleting log file: %s\n", err)
 	}
 	if err := os.Remove("./chip-tool.log"); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("Error deleting log file: %s\n", err)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-
-	logFile, err := os.Create("chip-all-clusters-minimal-app-commit-1536ca2.log")
+	logFile, err := os.Create(chipAllClusterMinimalAppLog)
 	if err != nil {
 		t.Fatalf("Error creating log file: %s\n", err)
 	}
-	defer logFile.Close()
 
-	// run chip-all-clusters-minimal-app-commit-1536ca2 in the background
-	go func() {
-		defer wg.Done()
+	// run chip-all-clusters-minimal-app in the background
+	cmd = exec.Command("./" + chipAllClusterMinimalAppFile)
+	cmd.Stdout = logFile
+	cmd.Stderr = logFile
 
-		cmd = exec.Command("./chip-all-clusters-minimal-app-commit-1536ca2")
-		cmd.Stdout = logFile
-		cmd.Stderr = logFile
+	err = cmd.Start()
+	if err != nil {
+		fmt.Printf("Error starting application: %s\n", err)
+	}
 
-		err := cmd.Start()
-		if err != nil {
-			fmt.Printf("Error starting application: %s\n", err)
+	if logFile != nil {
+		logFile.Close()
+	}
+
+	t.Cleanup(func() {
+		if err := cmd.Process.Kill(); err != nil {
+			t.Fatalf("Error killing process: %s\n", err)
 		}
-	}()
-
-	defer func() {
-        if err := cmd.Process.Kill(); err != nil {
-            t.Fatalf("Error killing process: %s\n", err)
-        }
-    }()
-
-	wg.Wait()
-
+	})
 
 	t.Run("Commission", func(t *testing.T) {
 		utils.Exec(t, "sudo chip-tool pairing onnetwork 110 20202021")
@@ -77,11 +72,13 @@ func TestMatterDeviceOperations(t *testing.T) {
 
 	t.Run("Control", func(t *testing.T) {
 		utils.Exec(t, "sudo chip-tool onoff toggle 110 1")
-		WaitForAppMessage(t, "./chip-all-clusters-minimal-app-commit-1536ca2.log", "CHIP:ZCL: Toggle ep1 on/off", start)
+		WaitForAppMessage(t, "./"+chipAllClusterMinimalAppLog, "CHIP:ZCL: Toggle ep1 on/off", start)
 	})
 }
 
 func setup() (teardown func(), err error) {
+	const chipToolSnap = "chip-tool"
+
 	log.Println("[CLEAN]")
 	utils.SnapRemove(nil, chipToolSnap)
 

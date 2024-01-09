@@ -25,13 +25,13 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-var cmd *exec.Cmd
-
 func TestMatterDeviceOperations(t *testing.T) {
 	const (
 		chipAllClusterMinimalAppFile = "chip-all-clusters-minimal-app-commit-1536ca2"
 		chipAllClusterMinimalAppLog  = "chip-all-clusters-minimal-app.log"
 	)
+
+	var cmd *exec.Cmd
 
 	//setup
 	if err := os.Remove("./" + chipAllClusterMinimalAppLog); err != nil && !os.IsNotExist(err) {

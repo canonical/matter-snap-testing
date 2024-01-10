@@ -1,11 +1,11 @@
 package test
 
 import (
-	"fmt"
 	"log"
 	"matter-snap-testing/test/utils"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -31,9 +31,7 @@ func TestMatterDeviceOperations(t *testing.T) {
 		chipAllClusterMinimalAppLog  = "chip-all-clusters-minimal-app.log"
 	)
 
-	var cmd *exec.Cmd
-
-	//setup
+	// Setup: remove exisiting log files
 	if err := os.Remove("./" + chipAllClusterMinimalAppLog); err != nil && !os.IsNotExist(err) {
 		t.Fatalf("Error deleting log file: %s\n", err)
 	}
@@ -41,26 +39,37 @@ func TestMatterDeviceOperations(t *testing.T) {
 		t.Fatalf("Error deleting log file: %s\n", err)
 	}
 
+	// Setup: run and log chip-all-clusters-minimal-app in the background
 	logFile, err := os.Create(chipAllClusterMinimalAppLog)
 	if err != nil {
 		t.Fatalf("Error creating log file: %s\n", err)
 	}
 
-	// run chip-all-clusters-minimal-app in the background
-	cmd = exec.Command("./" + chipAllClusterMinimalAppFile)
+	cmd := exec.Command("./" + chipAllClusterMinimalAppFile)
 	cmd.Stdout = logFile
 	cmd.Stderr = logFile
 
 	err = cmd.Start()
 	if err != nil {
-		fmt.Printf("Error starting application: %s\n", err)
-	}
-
-	if logFile != nil {
-		logFile.Close()
+		t.Fatalf("Error starting application: %s\n", err)
 	}
 
 	t.Cleanup(func() {
+		if logFile != nil {
+			logFile.Close()
+		}
+
+		matches, err := filepath.Glob("/tmp/chip_*")
+		if err != nil {
+			t.Fatalf("Error finding tmp chip files: %s\n", err)
+		}
+
+		for _, match := range matches {
+			if err := os.Remove(match); err != nil {
+				t.Fatalf("Error removing tmp chip file %s: %s\n", match, err)
+			}
+		}
+
 		if err := cmd.Process.Kill(); err != nil {
 			t.Fatalf("Error killing process: %s\n", err)
 		}
@@ -72,7 +81,7 @@ func TestMatterDeviceOperations(t *testing.T) {
 
 	t.Run("Control", func(t *testing.T) {
 		utils.Exec(t, "sudo chip-tool onoff toggle 110 1")
-		WaitForAppMessage(t, "./"+chipAllClusterMinimalAppLog, "CHIP:ZCL: Toggle ep1 on/off", start)
+		waitForAppMessage(t, "./"+chipAllClusterMinimalAppLog, "CHIP:ZCL: Toggle ep1 on/off", start)
 	})
 }
 
@@ -112,7 +121,7 @@ func setup() (teardown func(), err error) {
 	return
 }
 
-func WaitForAppMessage(t *testing.T, appLogPath, expectedLog string, since time.Time) {
+func waitForAppMessage(t *testing.T, appLogPath, expectedLog string, since time.Time) {
 	const maxRetry = 10
 
 	for i := 1; i <= maxRetry; i++ {
@@ -121,7 +130,7 @@ func WaitForAppMessage(t *testing.T, appLogPath, expectedLog string, since time.
 
 		logs, err := readLogFile(appLogPath)
 		if err != nil {
-			fmt.Println("Error reading log file:", err)
+			t.Fatalf("Error reading log file: %s\n", err)
 			continue
 		}
 
@@ -135,24 +144,9 @@ func WaitForAppMessage(t *testing.T, appLogPath, expectedLog string, since time.
 }
 
 func readLogFile(filePath string) (string, error) {
-	file, err := os.Open(filePath)
+	text, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
-
-	stat, err := file.Stat()
-	if err != nil {
-		return "", err
-	}
-
-	fileSize := stat.Size()
-	buffer := make([]byte, fileSize)
-
-	_, err = file.Read(buffer)
-	if err != nil {
-		return "", err
-	}
-
-	return string(buffer), nil
+	return string(text), nil
 }

@@ -71,13 +71,13 @@ runs:
       working-directory: ${{github.workspace}}/src/test
       run: ./print-errors.sh ${{inputs.name}}
 
-    # For some reason, github.action_path resolves to a wrong path when directly passed to
-    # upload-artifact's path or in bash
-    - if: always()
-      shell: bash
-      working-directory: ${{github.workspace}}/src/test
-      run: |
-        echo "workspace=$PWD" >> $GITHUB_ENV
+    # # For some reason, github.action_path resolves to a wrong path when directly passed to
+    # # upload-artifact's path or in bash
+    # - if: always()
+    #   shell: bash
+    #   working-directory: ${{github.workspace}}/src/test
+    #   run: |
+    #     echo "workspace=$PWD" >> $GITHUB_ENV
         
     # Upload snap logs
     - if: always() 

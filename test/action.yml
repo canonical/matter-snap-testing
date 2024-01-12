@@ -47,7 +47,7 @@ runs:
         echo "local_snap=${{github.workspace}}/${{inputs.snap}}" >> $GITHUB_OUTPUT
 
     # Checkout Repository with LFS
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: MonicaisHer/matter-snap-testing
         ref: IENG-881
@@ -62,7 +62,6 @@ runs:
         FULL_CONFIG_TEST: ${{inputs.full_config_test}}
         SKIP_TEARDOWN_REMOVAL: ${{inputs.skip_teardown_removal}}
       run: |
-        # git lfs pull --include "chip-all-clusters-minimal-app-commit-*"
         go test -failfast -p 1 -timeout 30m -v ./suites/${{inputs.name}} ${{inputs.go-args}}
 
     # Print error logs from snap(s)
@@ -71,13 +70,13 @@ runs:
       working-directory: ${{github.workspace}}/src/test
       run: ./print-errors.sh ${{inputs.name}}
 
-    # # For some reason, github.action_path resolves to a wrong path when directly passed to
-    # # upload-artifact's path or in bash
-    # - if: always()
-    #   shell: bash
-    #   working-directory: ${{github.workspace}}/src/test
-    #   run: |
-    #     echo "workspace=$PWD" >> $GITHUB_ENV
+    # For some reason, github.workspace resolves to a wrong path when directly passed to
+    # upload-artifact's path or in bash
+    - if: always()
+      shell: bash
+      working-directory: ${{github.workspace}}/src/test
+      run: |
+        echo "workspace=$PWD" >> $GITHUB_ENV
         
     # Upload snap logs
     - if: always() 

@@ -55,10 +55,6 @@ func TestMatterDeviceOperations(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		if logFile != nil {
-			logFile.Close()
-		}
-
 		matches, err := filepath.Glob("/tmp/chip_*")
 		if err != nil {
 			t.Fatalf("Error finding tmp chip files: %s\n", err)
@@ -72,6 +68,10 @@ func TestMatterDeviceOperations(t *testing.T) {
 
 		if err := cmd.Process.Kill(); err != nil {
 			t.Fatalf("Error killing process: %s\n", err)
+		}
+
+		if logFile != nil {
+			logFile.Close()
 		}
 	})
 

@@ -49,14 +49,14 @@ runs:
     # Checkout Repository with LFS
     - uses: actions/checkout@v2
       with:
-        repository: MonicaisHer/matter-snap-testing/test
+        repository: MonicaisHer/matter-snap-testing
         ref: IENG-881
         path: src
         lfs: true
         
     # Run smoke tests
     - shell: bash
-      working-directory: ${{github.action_path}}/src
+      working-directory: ${{github.workspace}}/src/test
       env:
         SERVICE_CHANNEL: ${{inputs.channel}}
         FULL_CONFIG_TEST: ${{inputs.full_config_test}}
@@ -68,21 +68,21 @@ runs:
     # Print error logs from snap(s)
     - if: failure()
       shell: bash
-      working-directory: ${{github.action_path}}/src
+      working-directory: ${{github.workspace}}/src/test
       run: ./print-errors.sh ${{inputs.name}}
 
     # For some reason, github.action_path resolves to a wrong path when directly passed to
     # upload-artifact's path or in bash
     - if: always()
       shell: bash
-      working-directory: ${{github.action_path}}/src
+      working-directory: ${{github.workspace}}/src/test
       run: |
-        echo "action_path=$PWD" >> $GITHUB_ENV
+        echo "workspace=$PWD" >> $GITHUB_ENV
         
     # Upload snap logs
     - if: always() 
       uses: actions/upload-artifact@v3
       with:
         name: ${{inputs.name}}-logs
-        path: ${{env.action_path}}/suites/${{inputs.name}}/*.log
+        path: ${{env.workspace}}/suites/${{inputs.name}}/*.log
         retention-days: 30

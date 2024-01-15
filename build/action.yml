@@ -1,4 +1,4 @@
-name: EdgeX Snap Builder
+name: Matter Snap Builder
 description: |
   This action clones the source code, builds the snap using and 
   uploads the resulting snap as a build artifact
@@ -29,16 +29,9 @@ runs:
         repository: ${{inputs.repo}}
         ref: ${{inputs.branch}}
 
-    # Get snap base version
-    - shell: bash
-      run: |
-        echo "base=$(sed -n 's/^base: //p' snap/snapcraft.yaml)" >> $GITHUB_ENV
-
     # Build the snap
     - uses: snapcore/action-build@v1
       id: build
-      with:
-        snapcraft-args: ${{ env.base == 'core22' && '--verbose' || '' }}
     
     # Upload the snap as build artifact
     - uses: actions/upload-artifact@v3

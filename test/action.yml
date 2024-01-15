@@ -1,4 +1,4 @@
-name: EdgeX Snap Tester
+name: Matter Snap Tester
 description: |
   This Github action runs various smoke tests to validate the snap packaging.
 
@@ -11,22 +11,12 @@ inputs:
     description: Name of the testing suite
     required: true
   snap:
-    description: Relative path to local platform or service snap
+    description: Relative path to local snap
     required: false
   channel:
     description: |
       Channel for downloading the snap from store.
       This is useful only when 'snap' input is not set.
-    required: false
-  platform_channel:
-    description: |
-      Channel for downloading the edgexfoundry snap from store.
-      This is used when testing services against the edgexfoundry snap.
-      This is useful only when 'snap' input is not set.
-    required: false
-  full_config_test:
-    description: |
-      Option for enabling full config options test to include for e.g. legacy options testing.
     required: false
   go-args:
     description: |
@@ -38,6 +28,14 @@ inputs:
         This is particularly useful when running tests on ephemeral CI instances.
     required: false
     default: 'true'
+  
+  # The values of github.action_repository and github.action_ref vary 
+  # based on their usage location. Therefore, setting the values as inputs 
+  # ensures that they align with the action itself rather than the step's action
+  action_repository:
+    default: ${{ github.action_repository }}
+  action_ref:
+    default: ${{ github.action_ref }}
   
 runs:
   using: composite
@@ -56,13 +54,18 @@ runs:
       run: |
         echo "local_snap=${{github.workspace}}/${{inputs.snap}}" >> $GITHUB_OUTPUT
 
+    # Checkout Repository with LFS
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{inputs.action_repository}}
+        ref: ${{inputs.action_ref}}
+        path: src
+        lfs: true
+
     # Run smoke tests
     - shell: bash
-      working-directory: ${{github.action_path}}
+      working-directory: ${{github.workspace}}/src/test
       env:
-        LOCAL_PLATFORM_SNAP: ${{ inputs.name == 'edgexfoundry' && steps.path.outputs.local_snap || '' }}
-        LOCAL_SERVICE_SNAP: ${{ inputs.name != 'edgexfoundry' && steps.path.outputs.local_snap || '' }}
-        PLATFORM_CHANNEL: ${{inputs.platform_channel}}
         SERVICE_CHANNEL: ${{inputs.channel}}
         FULL_CONFIG_TEST: ${{inputs.full_config_test}}
         SKIP_TEARDOWN_REMOVAL: ${{inputs.skip_teardown_removal}}
@@ -72,21 +75,13 @@ runs:
     # Print error logs from snap(s)
     - if: failure()
       shell: bash
-      working-directory: ${{github.action_path}}
+      working-directory: ${{github.workspace}}/src/test
       run: ./print-errors.sh ${{inputs.name}}
-
-    # For some reason, github.action_path resolves to a wrong path when directly passed to
-    # upload-artifact's path or in bash
-    - if: always()
-      shell: bash
-      working-directory: ${{github.action_path}}
-      run: |
-        echo "action_path=$PWD" >> $GITHUB_ENV
         
     # Upload snap logs
     - if: always() 
       uses: actions/upload-artifact@v3
       with:
         name: ${{inputs.name}}-logs
-        path: ${{env.action_path}}/suites/${{inputs.name}}/*.log
+        path: ${{github.workspace}}/src/test/suites/${{inputs.name}}/*.log
         retention-days: 30

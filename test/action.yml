@@ -28,6 +28,10 @@ inputs:
         This is particularly useful when running tests on ephemeral CI instances.
     required: false
     default: 'true'
+  
+  # The values of github.action_repository and github.action_ref vary 
+  # based on their usage location. Therefore, setting the values as inputs 
+  # ensures that they align with the action itself rather than the step's action
   action_repository:
     default: ${{ github.action_repository }}
   action_ref:
@@ -73,19 +77,11 @@ runs:
       shell: bash
       working-directory: ${{github.workspace}}/src/test
       run: ./print-errors.sh ${{inputs.name}}
-
-    # For some reason, github.workspace resolves to a wrong path when directly passed to
-    # upload-artifact's path or in bash
-    - if: always()
-      shell: bash
-      working-directory: ${{github.workspace}}/src/test
-      run: |
-        echo "workspace=$PWD" >> $GITHUB_ENV
         
     # Upload snap logs
     - if: always() 
       uses: actions/upload-artifact@v3
       with:
         name: ${{inputs.name}}-logs
-        path: ${{env.workspace}}/suites/${{inputs.name}}/*.log
+        path: ${{github.workspace}}/src/test/suites/${{inputs.name}}/*.log
         retention-days: 30

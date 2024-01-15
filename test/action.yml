@@ -56,7 +56,7 @@ runs:
 
     - shell: bash
       working-directory: ${{github.workspace}}/src
-      run: ls
+      run: ls src/
         
     # Run smoke tests
     - shell: bash

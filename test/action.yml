@@ -53,6 +53,8 @@ runs:
         ref: ${{github.action_ref}}
         path: src
         lfs: true
+      shell: bash
+      run: pwd && ls
         
     # Run smoke tests
     - shell: bash

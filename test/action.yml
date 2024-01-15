@@ -28,6 +28,10 @@ inputs:
         This is particularly useful when running tests on ephemeral CI instances.
     required: false
     default: 'true'
+  action_repository:
+    default: ${{ github.action_repository }}
+  action_ref:
+    default: ${{ github.action_ref }}
   
 runs:
   using: composite
@@ -49,8 +53,8 @@ runs:
     # Checkout Repository with LFS
     - uses: actions/checkout@v4
       with:
-        repository: ${{github.action_repository}}
-        ref: ${{github.action_ref}}
+        repository: ${{inputs.action_repository}}
+        ref: ${{inputs.action_ref}}
         path: src
         lfs: true
 

@@ -49,8 +49,8 @@ runs:
     # Checkout Repository with LFS
     - uses: actions/checkout@v4
       with:
-        repository: MonicaisHer/matter-snap-testing
-        ref: IENG-881
+        repository: ${{github.action_repository}}
+        ref: ${{github.action_ref}}
         path: src
         lfs: true
         

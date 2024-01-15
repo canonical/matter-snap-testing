@@ -60,7 +60,7 @@ runs:
 
     - shell: bash
       working-directory: ${{github.workspace}}/src
-      run: ls src/
+      run: ls
         
     # Run smoke tests
     - shell: bash

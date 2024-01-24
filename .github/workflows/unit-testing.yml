@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ main ]
     paths: 
-      - 'test/utils/**'
+      - 'utils/**'
   # manual trigger
   workflow_dispatch:
 

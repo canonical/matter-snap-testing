@@ -2,7 +2,7 @@
 
 Utility package for testing Matter snaps in Go.
 
-To run the unit tests:
+Test the testing utils:
 ```
-go test ./test/utils -count=100
+go test ./utils -count=100
 ```

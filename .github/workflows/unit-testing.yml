@@ -1,10 +1,12 @@
-# This workflow performs unit testing on utility packages
+# This workflow performs unit testing on the utility package
 name: Unit Testing
 
 on:
   pull_request:
     paths: 
       - 'utils/**'
+      - '.github/unit-testing.yml'
+      - 'go.*'
   # manual trigger
   workflow_dispatch:
 

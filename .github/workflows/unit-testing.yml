@@ -5,8 +5,8 @@ on:
   pull_request:
     paths: 
       - 'utils/**'
-      - '.github/unit-testing.yml'
       - 'go.*'
+      - '.github/workflows/unit-testing.yml'
   # manual trigger
   workflow_dispatch:
 

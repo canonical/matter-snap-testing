@@ -2,7 +2,7 @@ module github.com/canonical/matter-snap-testing
 
 go 1.21.6
 
-require github.com/stretchr/testify v1.8.3
+require github.com/stretchr/testify v1.8.4
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

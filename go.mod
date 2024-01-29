@@ -1,4 +1,4 @@
-module github.com/farshidtz/matter-snap-testing
+module github.com/canonical/matter-snap-testing
 
 go 1.21.6
 

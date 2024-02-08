@@ -10,18 +10,35 @@ import (
 )
 
 func Exec(t *testing.T, command string) (stdout, stderr string, err error) {
-	return exec(t, command, false)
+	return exec(t, nil, command, false)
 }
 
+func ExecVerbose()(t *testing.T, command string) (stdout, stderr string, err error) {
+	return exec(t, nil, command, true)
+}
+
+func ExecContext(t *testing.T, ctx context.Context, command string) (stdout, stderr string, err error){
+	return exec(t, ctx, command, false)
+}
+
+func ExecContextVerbose(t *testing.T, ctx context.Context, command string) (stdout, stderr string, err error){
+	return exec(t, ctx, command, true)
+}
+
+
 // exec executes a command
-func exec(t *testing.T, command string, verbose bool) (stdout, stderr string, err error) {
+func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdout, stderr string, err error) {
 	if t != nil {
 		t.Logf("[exec] %s", command)
 	} else {
 		log.Printf("[exec] %s", command)
 	}
 
-	cmd := goexec.Command("/bin/sh", "-c", command)
+	if ctx == nil {
+		cmd := goexec.Command("/bin/sh", "-c", command)
+	} else {
+		cmd := goexec.CommandContext(ctx, "/bin/sh", "-c", command)
+	}
 
 	var wg sync.WaitGroup
 
@@ -73,9 +90,8 @@ func exec(t *testing.T, command string, verbose bool) (stdout, stderr string, er
 				}
 			}
 			t.Fatal(err)
-		} else {
-			return stdout, stderr, err
 		}
+		return stdout, stderr, err
 	}
 
 	return

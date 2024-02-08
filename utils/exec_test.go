@@ -56,7 +56,7 @@ func TestExec(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
-		stdout, stderr, err := exec(t, ctx, "sleep 3", true)
+		stdout, stderr, err := exec(t, ctx, "sleep 2", true)
 
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
@@ -72,7 +72,7 @@ func TestExec(t *testing.T) {
 	})
 
 	t.Run("context with timeout", func(t *testing.T) {
-		ctx, cancel := context.WithDeadline(context.Background(), <-time.After(5*time.Second))
+		ctx, cancel := context.WithDeadline(context.Background(), <-time.After(2*time.Second))
 		defer cancel()
 
 		stdout, stderr, err := exec(nil, ctx, `sleep infinity`, true)

@@ -36,9 +36,9 @@ func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdo
 
 	var cmd *goexec.Cmd
 	if ctx == nil {
-		cmd = goexec.Command("/bin/sh", "-c", command)
+		cmd = goexec.Command("/bin/bash", "-c", command)
 	} else {
-		cmd = goexec.CommandContext(ctx, "/bin/sh", "-c", command)
+		cmd = goexec.CommandContext(ctx, "/bin/bash", "-c", command)
 	}
 
 	var wg sync.WaitGroup

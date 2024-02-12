@@ -51,33 +51,27 @@ func TestExec(t *testing.T) {
 		assert.Equal(t, "succeeding\n", stdout)
 	})
 
-	t.Run("context with cancel", func(t *testing.T) {
-		timeout := 5 * time.Second
+	t.Run("context timed out", func(t *testing.T) {
+		timeout := 1 * time.Second
+
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
+		t.Cleanup(cancel)
 
-		stdout, stderr, err := exec(t, ctx, "sleep 2", true)
+		start := time.Now()
+		_, _, err := exec(nil, ctx, `sleep 3`, true)
 
-		if err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
-
-		if stdout != "" {
-			t.Fatalf("Unexpected stdout: %s", stdout)
-		}
-
-		if stderr != "" {
-			t.Fatalf("Unexpected stderr: %s", stderr)
-		}
+		require.Error(t, err)
+		require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
 	})
 
-	t.Run("context with timeout", func(t *testing.T) {
-		ctx, cancel := context.WithDeadline(context.Background(), <-time.After(2*time.Second))
-		defer cancel()
+	t.Run("context not timed out", func(t *testing.T) {
+		timeout := 3 * time.Second
 
-		stdout, stderr, err := exec(nil, ctx, `sleep infinity`, true)
-		assert.Error(t, err)
-		t.Logf("stdout: %s", stdout)
-		t.Logf("stdeer: %s", stderr)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		t.Cleanup(cancel)
+
+		_, _, err := exec(nil, ctx, `sleep 1`, true)
+
+		require.NoError(t, err)
 	})
 }

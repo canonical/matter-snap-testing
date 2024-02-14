@@ -11,23 +11,39 @@ import (
 )
 
 func Exec(t *testing.T, command string) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
 	return exec(t, nil, command, false)
 }
 
 func ExecVerbose(t *testing.T, command string) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
 	return exec(t, nil, command, true)
 }
 
 func ExecContext(t *testing.T, ctx context.Context, command string) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
 	return exec(t, ctx, command, false)
 }
 
 func ExecContextVerbose(t *testing.T, ctx context.Context, command string) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
 	return exec(t, ctx, command, true)
 }
 
 // exec executes a command
 func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
+
 	if t != nil {
 		t.Logf("[exec] %s", command)
 	} else {

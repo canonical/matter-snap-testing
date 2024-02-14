@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"context"
+	"errors"
 	"io"
 	"log"
 	goexec "os/exec"
@@ -97,6 +98,11 @@ func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdo
 
 	// wait until command exits
 	if err = cmd.Wait(); err != nil {
+		if ctx != nil &&
+			(errors.Is(ctx.Err(), context.Canceled) || errors.Is(ctx.Err(), context.DeadlineExceeded)) {
+			// cancelled by caller: do no error out
+			return stdout, stderr, nil
+		}
 		if t != nil {
 			if !verbose {
 				if len(stdout) != 0 {

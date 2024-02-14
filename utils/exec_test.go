@@ -60,7 +60,7 @@ func TestExec(t *testing.T) {
 		start := time.Now()
 		_, _, err := exec(nil, ctx, `sleep 3`, true)
 
-		require.Error(t, err)
+		require.NoError(t, err)
 		require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
 	})
 

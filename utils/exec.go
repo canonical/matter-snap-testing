@@ -2,6 +2,8 @@ package utils
 
 import (
 	"bufio"
+	"context"
+	"errors"
 	"io"
 	"log"
 	goexec "os/exec"
@@ -10,18 +12,51 @@ import (
 )
 
 func Exec(t *testing.T, command string) (stdout, stderr string, err error) {
-	return exec(t, command, false)
+	if t != nil {
+		t.Helper()
+	}
+	return exec(t, nil, command, false)
+}
+
+func ExecVerbose(t *testing.T, command string) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
+	return exec(t, nil, command, true)
+}
+
+func ExecContext(t *testing.T, ctx context.Context, command string) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
+	return exec(t, ctx, command, false)
+}
+
+func ExecContextVerbose(t *testing.T, ctx context.Context, command string) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
+	return exec(t, ctx, command, true)
 }
 
 // exec executes a command
-func exec(t *testing.T, command string, verbose bool) (stdout, stderr string, err error) {
+func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdout, stderr string, err error) {
+	if t != nil {
+		t.Helper()
+	}
+
 	if t != nil {
 		t.Logf("[exec] %s", command)
 	} else {
 		log.Printf("[exec] %s", command)
 	}
 
-	cmd := goexec.Command("/bin/sh", "-c", command)
+	var cmd *goexec.Cmd
+	if ctx == nil {
+		cmd = goexec.Command("/bin/bash", "-c", command)
+	} else {
+		cmd = goexec.CommandContext(ctx, "/bin/bash", "-c", command)
+	}
 
 	var wg sync.WaitGroup
 
@@ -63,6 +98,11 @@ func exec(t *testing.T, command string, verbose bool) (stdout, stderr string, er
 
 	// wait until command exits
 	if err = cmd.Wait(); err != nil {
+		if ctx != nil &&
+			(errors.Is(ctx.Err(), context.Canceled) || errors.Is(ctx.Err(), context.DeadlineExceeded)) {
+			// cancelled by caller: do no error out
+			return stdout, stderr, nil
+		}
 		if t != nil {
 			if !verbose {
 				if len(stdout) != 0 {
@@ -73,9 +113,8 @@ func exec(t *testing.T, command string, verbose bool) (stdout, stderr string, er
 				}
 			}
 			t.Fatal(err)
-		} else {
-			return stdout, stderr, err
 		}
+		return stdout, stderr, err
 	}
 
 	return

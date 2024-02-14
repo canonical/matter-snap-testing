@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 func TestExec(t *testing.T) {
 
 	t.Run("one command", func(t *testing.T) {
-		stdout, stderr, err := exec(t, `echo "hi"`, true)
+		stdout, stderr, err := exec(t, nil, `echo "hi"`, true)
 		assert.NoError(t, err)
 		assert.Empty(t, stderr)
 		assert.Equal(t, "hi\n", stdout)
@@ -19,7 +20,7 @@ func TestExec(t *testing.T) {
 
 	t.Run("exit after slow command", func(t *testing.T) {
 		start := time.Now()
-		stdout, _, err := exec(t, `echo "hi" && sleep 0.1 && echo "hi2"`, true)
+		stdout, _, err := exec(t, nil, `echo "hi" && sleep 0.1 && echo "hi2"`, true)
 		// must return after 100ms±50ms
 		require.WithinDuration(t,
 			start.Add(100*time.Millisecond),
@@ -30,24 +31,47 @@ func TestExec(t *testing.T) {
 	})
 
 	t.Run("bad command", func(t *testing.T) {
-		stdout, stderr, err := exec(nil, `bad_command`, true)
+		stdout, stderr, err := exec(nil, nil, `bad_command`, true)
 		assert.Error(t, err)
 		assert.Empty(t, stdout)
 		assert.Contains(t, stderr, "not found")
 	})
 
 	t.Run("print to stderr", func(t *testing.T) {
-		stdout, stderr, err := exec(t, `echo "failing" >&2`, true)
+		stdout, stderr, err := exec(t, nil, `echo "failing" >&2`, true)
 		assert.NoError(t, err)
 		assert.Empty(t, stdout)
 		assert.Equal(t, "failing\n", stderr)
 	})
 
 	t.Run("stderr then stdout", func(t *testing.T) {
-		stdout, stderr, err := exec(t, `echo "failing" >&2; echo "succeeding"`, true)
+		stdout, stderr, err := exec(t, nil, `echo "failing" >&2; echo "succeeding"`, true)
 		assert.NoError(t, err)
 		assert.Equal(t, "failing\n", stderr)
 		assert.Equal(t, "succeeding\n", stdout)
 	})
 
+	t.Run("context timed out", func(t *testing.T) {
+		timeout := 1 * time.Second
+
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		t.Cleanup(cancel)
+
+		start := time.Now()
+		_, _, err := exec(nil, ctx, `sleep 3`, true)
+
+		require.NoError(t, err)
+		require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
+	})
+
+	t.Run("context not timed out", func(t *testing.T) {
+		timeout := 3 * time.Second
+
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		t.Cleanup(cancel)
+
+		_, _, err := exec(nil, ctx, `sleep 1`, true)
+
+		require.NoError(t, err)
+	})
 }

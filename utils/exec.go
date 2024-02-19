@@ -70,7 +70,7 @@ func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdo
 		}
 	}
 	wg.Add(1)
-	go scanStdPipe(t, outStream, &stdout, &wg, verbose, false)
+	go scanStdPipe(t, outStream, &stdout, &wg, verbose, "[stdout]")
 
 	// standard error
 	errStream, err := cmd.StderrPipe()
@@ -82,7 +82,7 @@ func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdo
 		}
 	}
 	wg.Add(1)
-	go scanStdPipe(t, errStream, &stderr, &wg, verbose, true)
+	go scanStdPipe(t, errStream, &stderr, &wg, verbose, "[stderr]")
 
 	// start execution
 	if err = cmd.Start(); err != nil {
@@ -121,15 +121,8 @@ func exec(t *testing.T, ctx context.Context, command string, verbose bool) (stdo
 }
 
 // scan and process the standard output / error streams
-func scanStdPipe(t *testing.T, stream io.Reader, streamStr *string, wg *sync.WaitGroup, verbose, stderr bool) {
+func scanStdPipe(t *testing.T, stream io.Reader, streamStr *string, wg *sync.WaitGroup, verbose bool, prefix string) {
 	defer wg.Done()
-
-	var prefix string
-	if stderr {
-		prefix = "[stderr]"
-	} else {
-		prefix = "[stdout]"
-	}
 
 	scanner := bufio.NewScanner(stream)
 

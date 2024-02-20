@@ -25,7 +25,7 @@ jobs:
 
     - name: Run tests with privileges
       if: always()
-      run: sudo env "PATH=$PATH" go test ./utils -v
+      run: sudo env "PATH=$PATH" go test -exec sudo ./utils -v
 
     # Run again several times to catch possible race conditions
     - run: go test ./utils -count=10

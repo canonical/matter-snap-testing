@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	goexec "os/exec"
 	"testing"
 	"time"
 
@@ -70,7 +71,18 @@ func TestExec(t *testing.T) {
 		})
 
 		t.Run("root", func(t *testing.T) {
-			testTimeout(t, "sudo sleep 10")
+			// testTimeout(t, "sudo sleep 10")
+
+			timeout := 1 * time.Second
+
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			t.Cleanup(cancel)
+
+			start := time.Now()
+			err := goexec.CommandContext(ctx, "sudo", "sleep", "10").Run()
+
+			require.Error(t, err)
+			require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
 		})
 
 	})

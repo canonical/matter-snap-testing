@@ -74,7 +74,7 @@ func TestExec(t *testing.T) {
 			testTimeout(t, "sudo sleep 10")
 		})
 
-		t.Run("root", func(t *testing.T) {
+		t.Run("root+stdout", func(t *testing.T) {
 			timeout := 1 * time.Second
 
 			ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -84,6 +84,19 @@ func TestExec(t *testing.T) {
 			out, err := goexec.CommandContext(ctx, "sudo", "sleep", "10").CombinedOutput()
 
 			t.Logf("output: %s", out)
+			require.Error(t, err)
+			require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
+		})
+
+		t.Run("root", func(t *testing.T) {
+			timeout := 1 * time.Second
+
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			t.Cleanup(cancel)
+
+			start := time.Now()
+			err := goexec.CommandContext(ctx, "sudo", "sleep", "10").Run()
+
 			require.Error(t, err)
 			require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
 		})

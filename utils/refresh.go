@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/canonical/matter-snap-testing/env"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,8 +14,8 @@ func TestRefresh(t *testing.T, snapName string) {
 
 		const stableChannel = "latest/stable"
 
-		if ServiceChannel == stableChannel {
-			t.Skipf("Skip refresh on same channel: %s", ServiceChannel)
+		if env.SnapChannel() == stableChannel {
+			t.Skipf("Skip refresh on same channel: %s", env.SnapChannel())
 		}
 
 		// remove and install the older stable revision
@@ -25,14 +26,14 @@ func TestRefresh(t *testing.T, snapName string) {
 
 		t.Cleanup(func() {
 			SnapRemove(t, snapName)
-			SnapInstallFromStore(t, snapName, ServiceChannel)
+			SnapInstallFromStore(t, snapName, env.SnapChannel())
 		})
 
 		originalVersion := SnapVersion(t, snapName)
 		originalRevision := SnapRevision(t, snapName)
 
 		t.Run("check services", func(t *testing.T) {
-			SnapRefresh(t, snapName, ServiceChannel)
+			SnapRefresh(t, snapName, env.SnapChannel())
 			refreshVersion := SnapVersion(t, snapName)
 			refreshRevision = SnapRevision(t, snapName)
 

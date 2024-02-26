@@ -25,6 +25,21 @@ var (
 	teardown    = true
 )
 
+// SnapChannel returns the set snap channel
+func SnapChannel() string {
+	return snapChannel
+}
+
+// SnapPath returns the set path to a local snap
+func SnapPath() string {
+	return snapPath
+}
+
+// SkipTeardownRemoval return
+func Teardown() (skip bool) {
+	return teardown
+}
+
 func init() {
 	loadEnvVars()
 }
@@ -47,19 +62,4 @@ func loadEnvVars() {
 			panic(err)
 		}
 	}
-}
-
-// SnapChannel returns the set snap channel
-func SnapChannel() string {
-	return snapChannel
-}
-
-// SnapPath returns the set path to a local snap
-func SnapPath() string {
-	return snapPath
-}
-
-// SkipTeardownRemoval return
-func Teardown() (skip bool) {
-	return teardown
 }

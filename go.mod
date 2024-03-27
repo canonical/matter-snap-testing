@@ -1,6 +1,6 @@
 module github.com/canonical/matter-snap-testing
 
-go 1.21.6
+go 1.22.1
 
 require github.com/stretchr/testify v1.8.4
 

@@ -4,6 +4,7 @@ name: Unit Testing
 on:
   pull_request:
     paths: 
+      - 'env/**'
       - 'utils/**'
       - 'go.*'
       - '.github/workflows/unit-testing.yml'

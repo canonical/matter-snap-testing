@@ -8,14 +8,14 @@ import (
 // Environment variables, used to override defaults
 const (
 	// Channel/Revision of the service snap (has default)
-	envSnapChannel = "SNAP_CHANNEL"
+	EnvSnapChannel = "SNAP_CHANNEL"
 
 	// Path to snap instead, used for testing a local snap instead of
 	// downloading from the store
-	envSnapPath = "SNAP_PATH"
+	EnvSnapPath = "SNAP_PATH"
 
 	// Toggle the teardown operations during tests (has default)
-	envTeardown = "TEARDOWN"
+	EnvTeardown = "TEARDOWN"
 )
 
 var (
@@ -47,15 +47,15 @@ func init() {
 // Read environment variables and perform type conversion/casting
 func loadEnvVars() {
 
-	if v := os.Getenv(envSnapChannel); v != "" {
+	if v := os.Getenv(EnvSnapChannel); v != "" {
 		snapChannel = v
 	}
 
-	if v := os.Getenv(envSnapPath); v != "" {
+	if v := os.Getenv(EnvSnapPath); v != "" {
 		snapPath = v
 	}
 
-	if v := os.Getenv(envTeardown); v != "" {
+	if v := os.Getenv(EnvTeardown); v != "" {
 		var err error
 		teardown, err = strconv.ParseBool(v)
 		if err != nil {

@@ -124,14 +124,15 @@ func snapJournalCommand(start time.Time, name string) string {
 		name)
 }
 
-func SnapDumpLogs(t *testing.T, start time.Time, name string) {
-	filename := name + ".log" // used in action.yml
+func SnapDumpLogs(t *testing.T, start time.Time, snapName string) {
+	logFileName := GetLogFileName(t, snapName)
+
 	ExecVerbose(t, fmt.Sprintf("(%s) > %s",
-		snapJournalCommand(start, name),
-		filename))
+		snapJournalCommand(start, snapName),
+		logFileName))
 
 	wd, _ := os.Getwd()
-	fmt.Printf("Wrote snap logs to %s/%s\n", wd, filename)
+	fmt.Printf("Wrote snap logs to %s/%s\n", wd, logFileName)
 }
 
 func SnapLogs(t *testing.T, start time.Time, name string) string {

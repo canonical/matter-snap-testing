@@ -125,7 +125,7 @@ func snapJournalCommand(start time.Time, name string) string {
 }
 
 func SnapDumpLogs(t *testing.T, start time.Time, snapName string) {
-	logFileName := GetLogFileName(t, snapName)
+	logFileName := logFileName(t, snapName)
 
 	ExecVerbose(t, fmt.Sprintf("(%s) > %s",
 		snapJournalCommand(start, snapName),

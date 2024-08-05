@@ -22,6 +22,6 @@ func WriteLogFile(t *testing.T, label string, content string) error {
 	return os.WriteFile(
 		logFileName(t, label),
 		[]byte(content),
-		0777,
+		0644,
 	)
 }

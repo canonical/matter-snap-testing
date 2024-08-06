@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -9,7 +10,7 @@ import (
 )
 
 type Config struct {
-	TestAutoStart  bool
+	TestAutoStart bool
 }
 
 func TestConfig(t *testing.T, snapName string, conf Config) {
@@ -65,5 +66,9 @@ func WaitForLogMessage(t *testing.T, snap, expectedLog string, since time.Time) 
 		}
 	}
 
-	t.Fatalf("Time out: reached max %d retries.", maxRetry)
+	t.Logf("Time out: reached max %d retries.", maxRetry)
+	stdout, _, _ := Exec(t,
+		fmt.Sprintf("sudo journalctl --lines=20 --no-pager --unit=snap.\"%s\" --priority=notice", snap))
+	t.Log(stdout)
+	t.FailNow()
 }

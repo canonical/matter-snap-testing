@@ -7,7 +7,10 @@ import (
 )
 
 func logFileName(t *testing.T, label string) string {
-	fileName := strings.ReplaceAll(t.Name(), "/", "-") + "-" + label + ".log"
+	fileName := label + ".log"
+	if t != nil {
+		fileName = strings.ReplaceAll(t.Name(), "/", "-") + "-" + fileName
+	}
 	logDirectory := "logs"
 
 	err := os.MkdirAll(logDirectory, 0777)

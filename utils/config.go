@@ -1,15 +1,13 @@
 package utils
 
 import (
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
 type Config struct {
-	TestAutoStart  bool
+	TestAutoStart bool
 }
 
 func TestConfig(t *testing.T, snapName string, conf Config) {
@@ -49,21 +47,4 @@ func TestAutostartGlobal(t *testing.T, snapName string) {
 		require.False(t, SnapServicesEnabled(t, snapName))
 		require.False(t, SnapServicesActive(t, snapName))
 	})
-}
-
-func WaitForLogMessage(t *testing.T, snap, expectedLog string, since time.Time) {
-	const maxRetry = 10
-
-	for i := 1; i <= maxRetry; i++ {
-		time.Sleep(1 * time.Second)
-		t.Logf("Retry %d/%d: Waiting for expected content in logs: %s", i, maxRetry, expectedLog)
-
-		logs := SnapLogs(t, since, snap)
-		if strings.Contains(logs, expectedLog) {
-			t.Logf("Found expected content in logs: %s", expectedLog)
-			return
-		}
-	}
-
-	t.Fatalf("Time out: reached max %d retries.", maxRetry)
 }

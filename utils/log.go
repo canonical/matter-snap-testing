@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func logFileName(t *testing.T, label string) string {
@@ -27,4 +28,21 @@ func WriteLogFile(t *testing.T, label string, content string) error {
 		[]byte(content),
 		0644,
 	)
+}
+
+func WaitForLogMessage(t *testing.T, snap, expectedLog string, since time.Time) {
+	const maxRetry = 10
+
+	for i := 1; i <= maxRetry; i++ {
+		time.Sleep(1 * time.Second)
+		t.Logf("Retry %d/%d: Waiting for expected content in logs: %s", i, maxRetry, expectedLog)
+
+		logs := SnapLogs(t, since, snap)
+		if strings.Contains(logs, expectedLog) {
+			t.Logf("Found expected content in logs: %s", expectedLog)
+			return
+		}
+	}
+
+	t.Fatalf("Time out: reached max %d retries.", maxRetry)
 }

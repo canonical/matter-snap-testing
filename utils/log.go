@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math"
 	"os"
 	"strings"
 	"testing"
@@ -31,11 +32,12 @@ func WriteLogFile(t *testing.T, label string, content string) error {
 }
 
 func WaitForLogMessage(t *testing.T, snap, expectedLog string, since time.Time) {
-	const maxRetry = 10
+	const maxRetry = 5
 
 	for i := 1; i <= maxRetry; i++ {
-		time.Sleep(1 * time.Second)
-		t.Logf("Retry %d/%d: Waiting for expected content in logs: %s", i, maxRetry, expectedLog)
+		waitTime := int(math.Pow(2.0, float64(i)-1.0))
+		time.Sleep(time.Duration(waitTime) * time.Second)
+		t.Logf("Retry %d/%d: Waiting %ds for expected content in logs: %s", i, maxRetry, waitTime, expectedLog)
 
 		logs := SnapLogs(t, since, snap)
 		if strings.Contains(logs, expectedLog) {

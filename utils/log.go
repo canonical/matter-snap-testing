@@ -34,7 +34,7 @@ func WriteLogFile(t *testing.T, label string, content string) error {
 func WaitForLogMessage(t *testing.T, snap, expectedLog string, since time.Time) {
 	const maxRetry = 5
 
-	for i := 1; i <= maxRetry; i++ {
+	for i := 1; i < maxRetry; i++ {
 		waitTime := int(math.Pow(2.0, float64(i)-1.0))
 		time.Sleep(time.Duration(waitTime) * time.Second)
 		t.Logf("Retry %d/%d: Waiting %ds for expected content in logs: %s", i, maxRetry, waitTime, expectedLog)

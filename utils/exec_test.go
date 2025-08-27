@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	goexec "os/exec"
 	"testing"
 	"time"
 
@@ -52,16 +53,54 @@ func TestExec(t *testing.T) {
 	})
 
 	t.Run("context timed out", func(t *testing.T) {
-		timeout := 1 * time.Second
+		testTimeout := func(t *testing.T, command string) {
+			timeout := 1 * time.Second
 
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		t.Cleanup(cancel)
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			t.Cleanup(cancel)
 
-		start := time.Now()
-		_, _, err := exec(nil, ctx, `sleep 3`, true)
+			start := time.Now()
+			_, _, err := exec(nil, ctx, command, true)
 
-		require.NoError(t, err)
-		require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
+			require.NoError(t, err)
+			require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
+		}
+
+		t.Run("user+bash", func(t *testing.T) {
+			testTimeout(t, "sleep 10")
+		})
+
+		t.Run("root+bash", func(t *testing.T) {
+			testTimeout(t, "sudo sleep 10")
+		})
+
+		t.Run("root+stdout", func(t *testing.T) {
+			timeout := 1 * time.Second
+
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			t.Cleanup(cancel)
+
+			start := time.Now()
+			out, err := goexec.CommandContext(ctx, "sudo", "sleep", "10").CombinedOutput()
+
+			t.Logf("output: %s", out)
+			require.Error(t, err)
+			require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
+		})
+
+		t.Run("root", func(t *testing.T) {
+			timeout := 1 * time.Second
+
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			t.Cleanup(cancel)
+
+			start := time.Now()
+			err := goexec.CommandContext(ctx, "sudo", "sleep", "10").Run()
+
+			require.Error(t, err)
+			require.WithinDuration(t, start, time.Now(), timeout+500*time.Millisecond)
+		})
+
 	})
 
 	t.Run("context not timed out", func(t *testing.T) {
